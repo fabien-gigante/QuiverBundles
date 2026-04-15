@@ -1,4 +1,4 @@
-![Icon](src\main\resources\assets\quiver-bundles\icon.png)
+![Icon](src/main/resources/assets/quiver-bundles/icon.png)
 # Quiver Bundles
 Bundles containing arrows act as quivers.
 
