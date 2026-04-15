@@ -7,5 +7,6 @@ import net.minecraft.world.item.ItemStack;
 
 public record BundleSlot(ItemStack bundle, int index) {
     private static final BundleSlot EMPTY = new BundleSlot(ItemStack.EMPTY, -1);
+    // not persistent
     public static final DataComponentType<BundleSlot> BUNDLE_SLOT = DataComponentType.<BundleSlot>builder().persistent(MapCodec.unitCodec(EMPTY)).build();
 }

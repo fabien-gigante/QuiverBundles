@@ -1,6 +1,7 @@
 package com.fabien_gigante.quiver_bundles.mixin;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.component.BundleContents;
 
 @Mixin(Player.class)
@@ -29,7 +31,8 @@ public abstract class PlayerMixin {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;hasInfiniteMaterials()Z"),
         cancellable = true
     )
-	private void getProjectileFromBundles(ItemStack weaponStack, CallbackInfoReturnable<ItemStack> cir) {
+	private void getProjectileFromBundles(ItemStack weapon, CallbackInfoReturnable<ItemStack> cir) {
+		Predicate<ItemStack> supportedProjectiles = ((ProjectileWeaponItem)weapon.getItem()).getAllSupportedProjectiles();
 		for (ItemStack stack : getInventory()) {
 			if (stack.isEmpty()) continue;
 			BundleContents bundle = stack.get(DataComponents.BUNDLE_CONTENTS);
@@ -39,6 +42,7 @@ public abstract class PlayerMixin {
 				ItemStackTemplate inside = items.get(j);
 				if (!inside.is(ItemTags.ARROWS)) continue;
 				ItemStack projectile = inside.create();
+				if (!supportedProjectiles.test(projectile)) continue;
 				projectile.set(BundleSlot.BUNDLE_SLOT, new BundleSlot(stack, j));
 				cir.setReturnValue(projectile);
 				return;
