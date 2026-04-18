@@ -3,7 +3,7 @@
 	"package": "com.fabien_gigante.quiver_bundles.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-		"PlayerMixin", "ProjectileWeaponItemMixin"
+		"PlayerMixin", "ProjectileWeaponItemMixin", "BundleContentsMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
