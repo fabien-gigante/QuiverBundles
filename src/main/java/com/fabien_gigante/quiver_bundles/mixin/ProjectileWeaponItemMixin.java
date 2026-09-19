@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.fabien_gigante.quiver_bundles.BundleSlot;
+import com.fabien_gigante.quiver_bundles.QuiverHolder;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -23,25 +23,16 @@ public abstract class ProjectileWeaponItemMixin {
             shift = At.Shift.AFTER
         )
     )
-    private static void useAmmoFromBundles(ItemStack weapon, ItemStack projectile, LivingEntity holder, boolean forceInfinite, CallbackInfoReturnable<ItemStack> cir) {
-        BundleSlot slot = projectile.remove(BundleSlot.BUNDLE_SLOT);
-        if (slot == null || slot.index() < 0) return;
-        BundleContents currentContents = slot.bundle().get(DataComponents.BUNDLE_CONTENTS);
-        if (currentContents == null) return;
-        int index = currentContents.getSelectedItemIndex();
-        BundleContents.Mutable newContents = currentContents.asMutable();
+    private static void useAmmoFromQuiver(ItemStack weapon, ItemStack projectile, LivingEntity holder, boolean forceInfinite, CallbackInfoReturnable<ItemStack> cir) {
+        QuiverHolder.QuiverSlot slot = holder instanceof QuiverHolder archer ? archer.getCurrentQuiverSlot(projectile) : null;
+        BundleContents contents = slot != null ? slot.bundle().get(DataComponents.BUNDLE_CONTENTS) : null;
+        if (contents == null) return;
+        int index = contents.getSelectedItemIndex();
+        BundleContents.Mutable newContents = contents.asMutable();
         if (index != slot.index()) newContents.toggleSelectedItem(slot.index());
         newContents.removeOne();
         if (!projectile.isEmpty()) newContents.tryInsert(projectile);
         else projectile.setCount(1); // prevents checking player inventory
         slot.bundle().set(DataComponents.BUNDLE_CONTENTS, newContents.toImmutable());
-    }
-
-    @Inject(method = "useAmmo", at = @At("RETURN"), cancellable = true)
-    private static void cleanAmmoFromBundles(ItemStack weapon, ItemStack projectile, LivingEntity holder, boolean forceInfinite, CallbackInfoReturnable<ItemStack> cir) {
-        ItemStack ammo = cir.getReturnValue();
-        projectile.remove(BundleSlot.BUNDLE_SLOT);
-        ammo.remove(BundleSlot.BUNDLE_SLOT);
-        cir.setReturnValue(ammo);
     }
 }
