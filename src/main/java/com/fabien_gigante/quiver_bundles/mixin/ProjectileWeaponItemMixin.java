@@ -26,12 +26,14 @@ public abstract class ProjectileWeaponItemMixin {
     private static void useAmmoFromBundles(ItemStack weapon, ItemStack projectile, LivingEntity holder, boolean forceInfinite, CallbackInfoReturnable<ItemStack> cir) {
         BundleSlot slot = projectile.remove(BundleSlot.BUNDLE_SLOT);
         if (slot == null) return;
-        BundleContents.Mutable contents = slot.bundle().get(DataComponents.BUNDLE_CONTENTS).asMutable();
-        contents.toggleSelectedItem(slot.index());
-        contents.removeOne();
-        if (!projectile.isEmpty()) contents.tryInsert(projectile);
+        BundleContents currentContents = slot.bundle().get(DataComponents.BUNDLE_CONTENTS);
+        int index = currentContents.getSelectedItemIndex();
+        BundleContents.Mutable newContents = currentContents.asMutable();
+        if (index != slot.index()) newContents.toggleSelectedItem(slot.index());
+        newContents.removeOne();
+        if (!projectile.isEmpty()) newContents.tryInsert(projectile);
         else projectile.setCount(1); // prevents checking player inventory
-        slot.bundle().set(DataComponents.BUNDLE_CONTENTS, contents.toImmutable());
+        slot.bundle().set(DataComponents.BUNDLE_CONTENTS, newContents.toImmutable());
     }
 
     @Inject(method = "useAmmo", at = @At("RETURN"), cancellable = true)
