@@ -25,8 +25,9 @@ public abstract class ProjectileWeaponItemMixin {
     )
     private static void useAmmoFromBundles(ItemStack weapon, ItemStack projectile, LivingEntity holder, boolean forceInfinite, CallbackInfoReturnable<ItemStack> cir) {
         BundleSlot slot = projectile.remove(BundleSlot.BUNDLE_SLOT);
-        if (slot == null) return;
+        if (slot == null || slot.index() < 0) return;
         BundleContents currentContents = slot.bundle().get(DataComponents.BUNDLE_CONTENTS);
+        if (currentContents == null) return;
         int index = currentContents.getSelectedItemIndex();
         BundleContents.Mutable newContents = currentContents.asMutable();
         if (index != slot.index()) newContents.toggleSelectedItem(slot.index());
